@@ -1,0 +1,6 @@
+@Typeneering.HostApi_HostAddress = http://localhost:5230
+
+GET {{Typeneering.HostApi_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

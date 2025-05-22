@@ -1,0 +1,99 @@
+# https://docs.docker.com/go/compose-spec-reference/
+# https://github.com/docker/awesome-compose
+services:
+  api:
+    container_name: api
+    profiles: [homolog]
+    build:
+      context: .
+      target: final
+    restart: always
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - typeneering
+    environment:
+      - ConnectionStrings__postgresConn=Server=postgres;Database=typeneering;User Id=postgres;Password=postgres;
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://*:5000
+    ports:
+      - 5000:5000
+
+  pgadmin:
+    image: dpage/pgadmin4:9.2.0
+    container_name: pgadmin
+    networks:
+      - typeneering
+    volumes:
+      - pgadmin-data:/var/lib/pgadmin/
+    ports:
+      - 8000:8000
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=postgres@postgres.com
+      - PGADMIN_DEFAULT_PASSWORD=postgres
+      - PGADMIN_LISTEN_PORT=8000
+      - MAX_LOGIN_ATTEMPTS=10
+    depends_on:
+      db:
+        condition: service_healthy
+
+  db:
+    image: postgres:17.4-alpine
+    container_name: postgres
+    restart: always
+    user: postgres
+    volumes:
+      - db-data:/var/lib/postgresql/
+    ports:
+      - 5432:5432
+    networks:
+      - typeneering
+    environment:
+      - POSTGRES_DB=typeneering
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_USER=postgres
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -d $${POSTGRES_DB} -U $${POSTGRES_USER}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  nginx:
+    image: nginx:1.27.5-alpine
+    container_name: nginx
+    restart: always
+    profiles: [homolog]
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+    ports:
+      - 4000:4000
+    networks:
+      - typeneering
+
+  seq:
+    image: datalust/seq:2025.1
+    container_name: seq
+    restart: unless-stopped
+    volumes:
+      - seq-data:/var/log/seq/
+    ports:
+      - 5341:5341
+    environment:
+      - ACCEPT_EULA=Y
+      - SEQ_FIRSTRUN_ADMINPASSWORD=123456
+    networks:
+      - typeneering
+
+
+volumes:
+  db-data:
+    driver: local
+  pgadmin-data:
+    driver: local
+  seq-data:
+    driver: local
+networks:
+  typeneering:
+    driver: bridge
+    external: true
