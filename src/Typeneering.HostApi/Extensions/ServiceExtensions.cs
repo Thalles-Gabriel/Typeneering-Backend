@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Protocols.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using Serilog;
 using Typeneering.Application.Base.Validators;
@@ -48,7 +49,7 @@ public static class ServiceExtensions
         => services.Configure<ForwardedHeadersOptions>(config =>
                     {
                         config.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto | ForwardedHeaders.XForwardedHost;
-                        config.KnownProxies.Add(IPAddress.Parse("nginx:4000"));
+                        config.KnownProxies.Add(IPAddress.TryParse("nginx:4000", out var address) ? address : IPAddress.Any);
                     })
                     .ConfigureHttpJsonOptions(options =>
                     {
