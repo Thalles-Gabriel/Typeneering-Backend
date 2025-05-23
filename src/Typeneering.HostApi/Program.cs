@@ -1,3 +1,4 @@
+using Serilog;
 using Typeneering.HostApi.Endpoints;
 using Typeneering.HostApi.Extensions;
 
@@ -8,11 +9,15 @@ builder.Services.AddApiServices(builder.Configuration)
                 .ServicesConfiguration();
 
 builder.Services.AddIdentityServices(builder.Configuration);
-
+builder.Host.UseSerilog((context, config) =>
+{
+    config.ReadFrom.Configuration(context.Configuration);
+});
 
 var app = builder.Build();
 
 app.UseForwardedHeaders();
+app.UseSerilogRequestLogging();
 
 if (app.Environment.IsDevelopment())
 {
