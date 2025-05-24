@@ -13,10 +13,10 @@ namespace Typeneering.Application.UserPreferences.Services;
 
 public class UserPreferenceService : IUserPreferenceService
 {
-    private readonly UserContextHandler _userContext;
+    private readonly IUserContextHandler _userContext;
     private readonly TypeneeringDbContext _dbContext;
 
-    public UserPreferenceService(TypeneeringDbContext dbContext, UserContextHandler userContext)
+    public UserPreferenceService(TypeneeringDbContext dbContext, IUserContextHandler userContext)
     {
         _dbContext = dbContext;
         _userContext = userContext;
