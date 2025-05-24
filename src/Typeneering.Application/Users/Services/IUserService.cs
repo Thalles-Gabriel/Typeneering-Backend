@@ -10,7 +10,7 @@ namespace Typeneering.Application.Users.Services;
 
 public interface IUserService
 {
-    Task<Results<Ok<ResultResponse>, ProblemHttpResult>> Register(UserLoginRequest login);
+    Task<Results<Ok<ResultResponse>, ProblemHttpResult>> Register(UserRegisterRequest login);
     Task<Results<Ok<AccessTokenResponse>, ProblemHttpResult>> Login(UserLoginRequest login);
     Task<Results<Ok<AccessTokenResponse>, ProblemHttpResult>> Refresh(RefreshRequest refreshRequest);
     Task<Results<Ok<ResultResponse>, ProblemHttpResult>> Update(PatchUserRequest userRequest, ClaimsPrincipal userClaims);

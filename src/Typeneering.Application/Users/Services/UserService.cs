@@ -54,12 +54,12 @@ public sealed class UserService : IUserService
         _ghValidator = ghValidator;
     }
 
-    public async Task<Results<Ok<ResultResponse>, ProblemHttpResult>> Register(UserLoginRequest login)
+    public async Task<Results<Ok<ResultResponse>, ProblemHttpResult>> Register(UserRegisterRequest login)
     {
         var user = new UserEntity
         {
             Email = login.Email,
-            UserName = login.UserName,
+            UserName = login.Username,
             NormalizedUserName = login.PreferredUsername
         };
 
