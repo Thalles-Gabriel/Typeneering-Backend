@@ -23,6 +23,8 @@ using Typeneering.Domain.User.Entities;
 using Typeneering.Infraestructure;
 using Typeneering.Application.Users.Validators;
 using Typeneering.Application.Base.Constants;
+using Typeneering.Application.Users.Contracts.Responses;
+using Typeneering.Application.UserPreferences.Contracts.Responses;
 
 namespace Typeneering.Application.Users.Services;
 
@@ -60,7 +62,7 @@ public sealed class UserService : IUserService
         {
             Email = login.Email,
             UserName = login.Username,
-            NormalizedUserName = login.PreferredUsername
+            NormalizedUserName = login.Nickname ?? login.Username
         };
 
         var result = await _userManager.CreateAsync(user, login.Password);
@@ -231,5 +233,16 @@ public sealed class UserService : IUserService
                     );
 
         return TypedResults.NoContent();
+    }
+
+    public async Task<Results<Ok<UserResponse>, ProblemHttpResult>> Get(ClaimsPrincipal userClaims)
+    {
+        var dbUser = await _userManager.GetUserAsync(userClaims) ?? throw new InvalidUserClaimsException();
+        var userPreferences = await _dbContext.UserPreferences.Where(upref => upref.UserId == dbUser.Id)
+                                                                .Include(upref => upref.Preference)
+                                                                .Select(upref => new UserPreferenceResponse(upref.Preference.Name, upref.Value))
+                                                                .ToListAsync();
+
+        return TypedResults.Ok(new UserResponse(dbUser.NormalizedUserName, dbUser.GitHubToken, userPreferences));
     }
 }

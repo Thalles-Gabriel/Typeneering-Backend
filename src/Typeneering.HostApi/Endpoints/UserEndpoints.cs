@@ -13,7 +13,7 @@ public static class UserEndpoints
 {
     public static IEndpointRouteBuilder MapUserRoutes(this IEndpointRouteBuilder routeBuilder)
     {
-        routeBuilder.MapPost("/register", async ([FromBody] UserLoginRequest login, [FromServices] IUserService userService)
+        routeBuilder.MapPost("/register", async ([FromBody] UserRegisterRequest login, [FromServices] IUserService userService)
                     => await userService.Register(login)).AllowAnonymous();
 
         routeBuilder.MapPost("/login", async ([FromBody] UserLoginRequest login, [FromServices] IUserService userService)
@@ -29,6 +29,11 @@ public static class UserEndpoints
 
         routeBuilder.MapPost("/gh-token", async ([FromBody] string token, [FromServices] IUserService userService, ClaimsPrincipal userClaims)
                     => await userService.UpdateGithubToken(token, userClaims))
+                                        .RequireAuthorization()
+                                        .RequireRateLimiting(RateLimiterConsts.UserPolicy);
+
+        routeBuilder.MapGet("/", async ([FromServices] IUserService userService, ClaimsPrincipal userClaims)
+                    => await userService.Get(userClaims))
                                         .RequireAuthorization()
                                         .RequireRateLimiting(RateLimiterConsts.UserPolicy);
 
