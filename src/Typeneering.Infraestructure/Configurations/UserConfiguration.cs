@@ -17,6 +17,9 @@ public class UserConfiguration : IEntityTypeConfiguration<UserEntity>
                 .HasMaxLength(UserConstraints.UsernameMaxLength)
                 .IsRequired();
 
+        builder.Property(user => user.NormalizedUserName)
+                .HasMaxLength(UserConstraints.UsernameMaxLength);
+
         builder.Property(user => user.CreatedAt)
                 .HasDefaultValueSql("NOW()");
     }
