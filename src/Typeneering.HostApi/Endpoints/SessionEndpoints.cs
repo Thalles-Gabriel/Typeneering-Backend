@@ -13,7 +13,7 @@ public static class SessionEndpoints
         routeBuilder.MapGet("/{id}", async ([FromRoute] int id, [FromServices] ISessionService service)
                 => await service.Get(id));
 
-        routeBuilder.MapGet("/tes", async ([AsParameters] GetSessionRequest query, [FromServices] ISessionService service)
+        routeBuilder.MapGet("/", async ([AsParameters] GetSessionRequest query, [FromServices] ISessionService service)
                 => await service.GetList(query));
 
         routeBuilder.MapGet("/leaderboard", async ([AsParameters] LeaderboardRequest request, ISessionService service)
