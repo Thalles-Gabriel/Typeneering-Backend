@@ -37,19 +37,21 @@ public static class ServiceExtensions
                     .AddDbContext<TypeneeringDbContext>();
 
     public static IServiceCollection AddAppServices(this IServiceCollection services, IConfiguration configuration)
-        => services.AddScoped<IJWTTokenHandler, JWTTokenHandler>()
-                    .AddScoped<IUserContextHandler, UserContextHandler>()
+        => services.AddValidatorsFromAssemblyContaining(typeof(PagedRequestValidator<>))
                     .AddScoped<IUserService, UserService>()
                     .AddScoped<ISessionService, SessionService>()
                     .AddScoped<IUserPreferenceService, UserPreferenceService>()
-                    .AddValidatorsFromAssemblyContaining(typeof(PagedRequestValidator<>));
+                    .AddSingleton<IJWTTokenHandler, JWTTokenHandler>()
+                    .AddScoped<IUserContextHandler, UserContextHandler>();
 
 
     public static IServiceCollection ServicesConfiguration(this IServiceCollection services)
         => services.Configure<ForwardedHeadersOptions>(config =>
                     {
                         config.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto | ForwardedHeaders.XForwardedHost;
-                        config.KnownProxies.Add(IPAddress.TryParse("nginx:4000", out var address) ? address : IPAddress.Any);
+                    #if !DEBUG
+                        config.KnownProxies.Add(IPAddress.TryParse("nginx:4000", out var address) ? address : throw new InvalidConfigurationException());
+                    #endif
                     })
                     .ConfigureHttpJsonOptions(options =>
                     {

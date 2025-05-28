@@ -4,11 +4,12 @@ using Typeneering.HostApi.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddIdentityServices(builder.Configuration);
+
 builder.Services.AddApiServices(builder.Configuration)
                 .AddAppServices(builder.Configuration)
                 .ServicesConfiguration();
 
-builder.Services.AddIdentityServices(builder.Configuration);
 builder.Host.UseSerilog((context, config) =>
 {
     config.ReadFrom.Configuration(context.Configuration);
@@ -19,14 +20,13 @@ var app = builder.Build();
 app.UseForwardedHeaders();
 app.UseSerilogRequestLogging();
 
-if (app.Environment.IsDevelopment())
-{
-    app.MapOpenApi();
-    app.UseStatusCodePages();
-    app.UseSwagger();
-    app.UseSwaggerUI();
-    app.MapSwagger();
-}
+#if DEBUG
+app.MapOpenApi().AllowAnonymous();
+app.UseStatusCodePages();
+app.UseSwagger();
+app.UseSwaggerUI();
+app.MapSwagger().AllowAnonymous();
+#endif
 
 // TODO: Configure Postgres in deeper detail and pgadmin email(?) and nginx workers, open ports and general production settings
 // TODO: Setup SSL in reverse-proxy
@@ -36,9 +36,9 @@ if (app.Environment.IsDevelopment())
 // app.UseHttpsRedirection();
 // app.UseHsts();
 
-app.UseAuthentication()
-    .UseAuthorization()
-    .UseExceptionHandler();
+app.UseAuthentication();
+app.UseAuthorization();
+app.UseExceptionHandler();
 
 
 app.MapGroup("/user").MapUserRoutes();
