@@ -32,6 +32,7 @@ public static class AuthenticationExtensions
             ValidIssuer = configuration.GetSection("Jwt:Issuer").Value,
             ValidAudience = configuration.GetSection("Jwt:Audience").Value,
             ValidateIssuerSigningKey = true,
+            ValidateLifetime = true,
             IssuerSigningKey = securityKey,
             ClockSkew = TimeSpan.Zero
         };
