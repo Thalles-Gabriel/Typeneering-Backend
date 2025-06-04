@@ -32,17 +32,17 @@ app.MapSwagger().AllowAnonymous();
 // TODO: Setup SSL in reverse-proxy
 // TODO: Setup jwt for production, like security keys
 // TODO: Setup Logging configuration for production
-// TODO: Remove github api keys
 // app.UseHttpsRedirection();
 // app.UseHsts();
-
-app.UseAuthentication();
-app.UseAuthorization();
-app.UseExceptionHandler();
 
 
 app.MapGroup("/user").MapUserRoutes();
 app.MapGroup("/session").MapSessionRoutes();
 app.MapGroup("/user-preference").MapUserPreferenceRoutes();
+
+app.UseAuthentication()
+    .UseAuthorization()
+    .UseExceptionHandler();
+
 
 await app.RunAsync();
