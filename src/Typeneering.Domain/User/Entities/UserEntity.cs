@@ -10,8 +10,6 @@ public sealed class UserEntity : IdentityUser<Guid>
     public string? GitHubToken { get; set; }
     public DateTimeOffset CreatedAt { get; set; }
     public DateTimeOffset? UpdatedAt { get; set; }
-    public new string UserName { get; set; }
-    public new string NormalizedUserName { get; set; }
     public ICollection<SessionEntity> Sessions { get; set; } = [];
     public ICollection<PreferenceEntity> Preferences { get; set; } = [];
 }

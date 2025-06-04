@@ -13,18 +13,18 @@ using Microsoft.AspNetCore.Mvc.Routing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using Typeneering.Application.Base.Constants;
 using Typeneering.Application.Base.Contracts.Responses;
-using Typeneering.Application.Users.Constants;
 using Typeneering.Application.Handlers.Token;
+using Typeneering.Application.UserPreferences.Contracts.Responses;
+using Typeneering.Application.Users.Constants;
 using Typeneering.Application.Users.Contracts.Requests;
-using Typeneering.Domain.Shared.Exceptions;
+using Typeneering.Application.Users.Contracts.Responses;
+using Typeneering.Application.Users.Validators;
 using Typeneering.Domain.Shared;
+using Typeneering.Domain.Shared.Exceptions;
 using Typeneering.Domain.User.Entities;
 using Typeneering.Infraestructure;
-using Typeneering.Application.Users.Validators;
-using Typeneering.Application.Base.Constants;
-using Typeneering.Application.Users.Contracts.Responses;
-using Typeneering.Application.UserPreferences.Contracts.Responses;
 
 namespace Typeneering.Application.Users.Services;
 
@@ -61,8 +61,8 @@ public sealed class UserService : IUserService
         var user = new UserEntity
         {
             Email = login.Email,
-            UserName = login.Username,
-            NormalizedUserName = login.Nickname ?? login.Username
+            NormalizedUserName = login.Username,
+            UserName = login.Nickname ?? login.Username
         };
 
         var result = await _userManager.CreateAsync(user, login.Password);
@@ -70,7 +70,7 @@ public sealed class UserService : IUserService
         if (!result.Succeeded)
             return TypedResults.Problem(new ValidationProblemDetails
             {
-                Errors = result.Errors.ToDictionary(keyValue => keyValue.Code, keyValue => new string[] { keyValue.Description }),
+                Errors = result.Errors.ToDictionary(error => error.Code, error => new string[] { error.Description }),
                 Title = UserConsts.Errors.Login.RegisterTitle,
                 Detail = UserConsts.Errors.Login.RegisterDetails,
                 Type = UserConsts.Errors.Login.RegisterType,
@@ -85,7 +85,7 @@ public sealed class UserService : IUserService
 
     public async Task<Results<Ok<AccessTokenResponse>, ProblemHttpResult>> Login(UserLoginRequest login)
     {
-        var signInResult = await _signInManager.PasswordSignInAsync(login.UserName, login.Password, isPersistent: false, lockoutOnFailure: true);
+        var signInResult = await _signInManager.PasswordSignInAsync(login.UserName, login.Password, isPersistent: false, lockoutOnFailure: false);
 
         if (!signInResult.Succeeded)
             return TypedResults.Problem(
@@ -170,7 +170,7 @@ public sealed class UserService : IUserService
         if (!identityResult.Succeeded)
             return TypedResults.Problem(new ValidationProblemDetails
             {
-                Errors = identityResult.Errors.ToDictionary(keyValue => keyValue.Code, keyValue => new string[] { keyValue.Description }),
+                Errors = identityResult.Errors.ToDictionary(error => error.Code, error => new string[] { error.Description }),
                 Title = UserConsts.Errors.User.UpdateTitle,
                 Detail = UserConsts.Errors.User.UpdateDetail,
                 Type = UserConsts.Errors.User.UpdateType,
@@ -192,7 +192,7 @@ public sealed class UserService : IUserService
         if (!identityResult.Succeeded)
             return TypedResults.Problem(new ValidationProblemDetails
             {
-                Errors = identityResult.Errors.ToDictionary(keyValue => keyValue.Code, keyValue => new string[] { keyValue.Description }),
+                Errors = identityResult.Errors.ToDictionary(error => error.Code, error => new string[] { error.Description }),
                 Title = UserConsts.Errors.User.DeleteTitle,
                 Detail = UserConsts.Errors.User.DeleteDetail,
                 Type = UserConsts.Errors.User.DeleteType,
@@ -243,6 +243,6 @@ public sealed class UserService : IUserService
                                                                 .Select(upref => new UserPreferenceResponse(upref.Preference.Name, upref.Value))
                                                                 .ToListAsync();
 
-        return TypedResults.Ok(new UserResponse(dbUser.NormalizedUserName, dbUser.GitHubToken, userPreferences));
+        return TypedResults.Ok(new UserResponse(dbUser.NormalizedUserName ?? string.Empty, dbUser.GitHubToken, userPreferences));
     }
 }

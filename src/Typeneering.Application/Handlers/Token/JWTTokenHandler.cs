@@ -54,14 +54,14 @@ public class JWTTokenHandler : IJWTTokenHandler
     {
         return
         [
-            new(ClaimTypes.Name, user.UserName),
+            new(ClaimTypes.Name, user.UserName ?? string.Empty),
             new(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
             new(JwtRegisteredClaimNames.Typ, JwtBearerDefaults.AuthenticationScheme),
             new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
             new(JwtRegisteredClaimNames.AuthTime, DateTimeOffset.Now.ToUnixTimeSeconds().ToString(), ClaimValueTypes.Integer),
             new(JwtRegisteredClaimNames.Nbf, DateTime.Now.ToString()),
             new(JwtRegisteredClaimNames.Iat, DateTimeOffset.Now.ToUnixTimeSeconds().ToString(), ClaimValueTypes.Integer),
-            new(JwtRegisteredClaimNames.Name, user.UserName),
+            new(JwtRegisteredClaimNames.Name, user.UserName ?? string.Empty),
             new(JwtRegisteredClaimNames.Email, user.Email ?? string.Empty),
             new(JwtRegisteredClaimNames.PreferredUsername, user.NormalizedUserName ?? string.Empty)
         ];
